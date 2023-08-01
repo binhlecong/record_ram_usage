@@ -1,6 +1,8 @@
 import psutil
 import time
 import matplotlib.pyplot as plt
+import pandas as pd
+from datetime import date
 
 
 def draw_plot(usages):
@@ -15,11 +17,11 @@ def draw_plot(usages):
     plt.show()
 
 
-def main(procName, interval):
+def main(procName, duration, interval, description):
     print('> Recording RAM usage of ' + procName)
     isProcOn = True
     ramUsages = []
-    while isProcOn:
+    while isProcOn and duration > 0:
         for proc in psutil.process_iter():
             isProcOn = False
             if proc.name() == procName:
@@ -29,9 +31,14 @@ def main(procName, interval):
                 print(vms)
                 break
         time.sleep(interval)
+        duration -= interval
     print('> Recording stop')
-    draw_plot(usages=ramUsages)
+
+    df = pd.DataFrame(ramUsages)
+    now = date.today()
+    df.to_csv(description + '_' + now.strftime("%m-%d-%y-%H-%M-%S") + '.csv')
+    # draw_plot(usages=ramUsages)
 
 
 if __name__ == '__main__':
-    main('studio64.exe', 1)
+    main('studio64.exe', 2 * 60, 2, 'armordroid3')
